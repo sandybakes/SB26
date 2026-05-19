@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Track My Order — Sandy Bakes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+:root{
+  --crimson:#A11F21;--dark-crimson:#7a1618;--cream:#fff8f5;
+  --deep:#1a0a0b;--soft-red:#f5e8e8;--gray:#6e6e6e;
+  --light-gray:#f2eded;--green:#2d7a3a;--gold:#d4a843;
+  --shadow:0 8px 32px rgba(161,31,33,.12);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--deep);min-height:100vh;}
+
+nav{background:var(--crimson);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo img{height:40px;border-radius:50%;}
+.nav-logo span{font-family:'Playfair Display',serif;font-size:1.2rem;color:#fff;font-weight:700;}
+.nav-back{color:rgba(255,255,255,.8);text-decoration:none;font-size:.85rem;font-weight:500;
+  display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;
+  border:1px solid rgba(255,255,255,.3);transition:all .2s;}
+.nav-back:hover{background:rgba(255,255,255,.1);color:#fff;}
+
+.page-hero{background:linear-gradient(135deg,var(--dark-crimson),var(--crimson));
+  padding:56px 24px;text-align:center;}
+.page-hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,5vw,3rem);
+  color:#fff;margin-bottom:10px;}
+.page-hero p{color:rgba(255,255,255,.75);font-size:.95rem;}
+
+.main{max-width:760px;margin:0 auto;padding:40px 24px 80px;}
+
+.search-card{background:#fff;border-radius:20px;padding:32px;
+  box-shadow:var(--shadow);margin-bottom:32px;border:1px solid rgba(161,31,33,.08);}
+.search-card h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--deep);
+  margin-bottom:6px;}
+.search-card p{color:var(--gray);font-size:.875rem;margin-bottom:24px;}
+.search-row{display:flex;gap:12px;}
+.search-row input{flex:1;padding:13px 18px;border:2px solid rgba(161,31,33,.2);
+  border-radius:12px;font-size:.95rem;font-family:'DM Sans',sans-serif;outline:none;
+  transition:border-color .2s;background:var(--cream);}
+.search-row input:focus{border-color:var(--crimson);}
+.btn-track{background:var(--crimson);color:#fff;border:none;padding:13px 28px;
+  border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;white-space:nowrap;
+  font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;gap:8px;}
+.btn-track:hover{background:var(--dark-crimson);}
+.btn-track:disabled{background:#ccc;cursor:not-allowed;}
+
+.result-card{background:#fff;border-radius:20px;padding:32px;
+  box-shadow:var(--shadow);border:1px solid rgba(161,31,33,.08);display:none;}
+.result-card.show{display:block;animation:fadeUp .4s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+.order-header{display:flex;align-items:flex-start;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;margin-bottom:28px;padding-bottom:20px;
+  border-bottom:2px solid var(--light-gray);}
+.order-id-badge{background:var(--soft-red);border-radius:10px;padding:12px 16px;}
+.order-id-badge .label{font-size:.7rem;color:var(--gray);font-weight:600;
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+.order-id-badge .id{font-size:1.2rem;font-weight:700;color:var(--crimson);letter-spacing:1px;}
+.order-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+.info-chip{background:var(--cream);border-radius:12px;padding:14px;
+  border:1px solid rgba(161,31,33,.08);}
+.info-chip .ic-label{font-size:.7rem;color:var(--gray);font-weight:600;
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.info-chip .ic-val{font-size:.9rem;font-weight:600;color:var(--deep);}
+
+/* STATUS TRACKER */
+.status-tracker{margin-bottom:28px;}
+.status-tracker h4{font-family:'Playfair Display',serif;font-size:1rem;
+  color:var(--deep);margin-bottom:20px;}
+.tracker-steps{position:relative;padding-left:32px;}
+.tracker-steps::before{content:'';position:absolute;left:13px;top:8px;bottom:8px;
+  width:2px;background:var(--light-gray);}
+.step{position:relative;padding:0 0 24px 20px;display:flex;align-items:flex-start;gap:14px;}
+.step:last-child{padding-bottom:0;}
+.step-dot{position:absolute;left:-31px;width:28px;height:28px;border-radius:50%;
+  background:var(--light-gray);border:3px solid #fff;display:flex;
+  align-items:center;justify-content:center;font-size:.65rem;
+  box-shadow:0 0 0 2px var(--light-gray);transition:all .3s;flex-shrink:0;}
+.step.done .step-dot{background:var(--green);box-shadow:0 0 0 2px rgba(45,122,58,.25);color:#fff;}
+.step.active .step-dot{background:var(--crimson);box-shadow:0 0 0 4px rgba(161,31,33,.2);
+  color:#fff;animation:pulse-dot 1.5s infinite;}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 4px rgba(161,31,33,.2);}50%{box-shadow:0 0 0 8px rgba(161,31,33,.05);}}
+.step-content h5{font-size:.875rem;font-weight:600;color:var(--deep);margin-bottom:2px;}
+.step.done .step-content h5{color:var(--green);}
+.step.active .step-content h5{color:var(--crimson);}
+.step-content p{font-size:.78rem;color:var(--gray);line-height:1.4;}
+.step-time{font-size:.72rem;color:var(--crimson);font-weight:600;margin-top:2px;}
+
+.items-section{margin-bottom:24px;}
+.items-section h4{font-family:'Playfair Display',serif;font-size:1rem;
+  color:var(--deep);margin-bottom:12px;}
+.items-list{background:var(--cream);border-radius:10px;padding:14px;
+  border:1px solid rgba(161,31,33,.08);}
+.item-row{display:flex;justify-content:space-between;padding:6px 0;
+  font-size:.85rem;border-bottom:1px solid rgba(161,31,33,.06);}
+.item-row:last-child{border:none;}
+.total-row{display:flex;justify-content:space-between;font-weight:700;
+  font-size:1rem;padding-top:10px;color:var(--crimson);margin-top:4px;}
+
+.pay-status{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+  border-radius:50px;font-size:.78rem;font-weight:700;}
+.pay-paid{background:#e8f5e9;color:var(--green);}
+.pay-pending{background:#fff3e0;color:#e65100;}
+.pay-rejected{background:#ffebee;color:#b71c1c;}
+
+.error-card{background:#ffebee;border-radius:16px;padding:28px;text-align:center;
+  border:1px solid rgba(184,28,28,.2);display:none;}
+.error-card.show{display:block;}
+.error-card i{font-size:2rem;color:#b71c1c;margin-bottom:12px;display:block;}
+.error-card h3{color:#b71c1c;font-family:'Playfair Display',serif;margin-bottom:8px;}
+.error-card p{color:var(--gray);font-size:.875rem;}
+
+.wa-help{background:var(--soft-red);border-radius:14px;padding:20px 24px;
+  display:flex;align-items:center;gap:16px;margin-top:28px;
+  border:1px solid rgba(161,31,33,.1);}
+.wa-help i{font-size:1.8rem;color:var(--crimson);}
+.wa-help-text h4{font-size:.9rem;font-weight:700;color:var(--deep);margin-bottom:2px;}
+.wa-help-text p{font-size:.8rem;color:var(--gray);}
+.wa-btn{margin-left:auto;background:var(--green);color:#fff;border:none;
+  padding:10px 18px;border-radius:10px;cursor:pointer;font-size:.8rem;
+  font-weight:700;white-space:nowrap;font-family:'DM Sans',sans-serif;text-decoration:none;
+  display:flex;align-items:center;gap:6px;}
+
+footer{background:var(--deep);color:rgba(255,255,255,.5);
+  text-align:center;padding:24px;font-size:.8rem;}
+footer a{color:var(--crimson);text-decoration:none;}
+
+@media(max-width:600px){
+  .search-row{flex-direction:column;}
+  .order-info-grid{grid-template-columns:1fr;}
+  .wa-help{flex-wrap:wrap;}
+  .wa-btn{margin-left:0;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="https://sandybakes.github.io/SB26/Logo.jpg" alt="Sandy Bakes"
+      onerror="this.src='https://via.placeholder.com/40x40?text=SB'"/>
+    <span>Sandy Bakes</span>
+  </a>
+  <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> Back to Shop</a>
+</nav>
+
+<div class="page-hero">
+  <h1>Track Your Order</h1>
+  <p>Enter your Order ID to see real-time updates on your delicious order 🎂</p>
+</div>
+
+<div class="main">
+  <div class="search-card">
+    <h3>Enter Order ID</h3>
+    <p>Your Order ID was sent to your email and shown on the confirmation screen after placing your order.</p>
+    <div class="search-row">
+      <input type="text" id="orderIdInput" placeholder="e.g. SB20251219-4832"
+        onkeydown="if(event.key==='Enter') trackOrder()"/>
+      <button class="btn-track" id="trackBtn" onclick="trackOrder()">
+        <i class="fas fa-search"></i> Track Order
+      </button>
+    </div>
+  </div>
+
+  <div class="error-card" id="errorCard">
+    <i class="fas fa-exclamation-circle"></i>
+    <h3>Order Not Found</h3>
+    <p id="errorMsg">Please check your Order ID and try again later.</p>
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <div class="order-header">
+      <div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--deep);margin-bottom:4px;">
+          Order Details</h3>
+        <p style="color:var(--gray);font-size:.82rem;">Last updated: <span id="lastUpdated">—</span></p>
+      </div>
+      <div class="order-id-badge">
+        <div class="label">Order ID</div>
+        <div class="id" id="displayOrderId">—</div>
+      </div>
+    </div>
+
+    <div class="order-info-grid">
+      <div class="info-chip">
+        <div class="ic-label">Customer</div>
+        <div class="ic-val" id="customerName">—</div>
+      </div>
+      <div class="info-chip">
+        <div class="ic-label">Delivery Date</div>
+        <div class="ic-val" id="deliveryDate">—</div>
+      </div>
+      <div class="info-chip">
+        <div class="ic-label">Order Date</div>
+        <div class="ic-val" id="orderDate">—</div>
+      </div>
+      <div class="info-chip">
+        <div class="ic-label">Payment Status</div>
+        <div class="ic-val" id="payStatus">—</div>
+      </div>
+    </div>
+
+    <div class="status-tracker">
+      <h4><i class="fas fa-route" style="color:var(--crimson);margin-right:8px;"></i>Order Progress</h4>
+      <div class="tracker-steps" id="trackerSteps"></div>
+    </div>
+
+    <div class="items-section">
+      <h4><i class="fas fa-receipt" style="color:var(--crimson);margin-right:8px;"></i>Items Ordered</h4>
+      <div class="items-list">
+        <div class="item-row"><span id="itemsSummary" style="color:var(--gray);">—</span></div>
+        <div class="total-row">
+          <span>Total Amount</span>
+          <span id="totalAmount">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="wa-help">
+      <i class="fab fa-whatsapp" style="color:var(--green);"></i>
+      <div class="wa-help-text">
+        <h4>Need Help?</h4>
+        <p>Contact Sandy Bakes on WhatsApp for any queries about your order.</p>
+      </div>
+      <a href="https://wa.me/919361373386" target="_blank" class="wa-btn">
+        <i class="fab fa-whatsapp"></i> Chat Now
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2025 <a href="index.html">Sandy Bakes</a> — Baked with ❤️ in Chennai, Tamil Nadu
+</footer>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzK6MgBg1IHFcUjF90UmPjZDDDGtbJmOhV-iHp7qsx04vhzpvTRqQm8dDVz2UKyRPtv9Q/exec";
+
+const STATUSES = [
+  { key: "New",         label: "Order Placed",    desc: "We've received your order and it's being reviewed.", icon: "fas fa-check" },
+  { key: "Confirmed",   label: "Order Confirmed",  desc: "Your order has been confirmed and payment verified.", icon: "fas fa-thumbs-up" },
+  { key: "In Progress", label: "Being Prepared",   desc: "Sandy is baking your order fresh with love! 🧁", icon: "fas fa-fire" },
+  { key: "Ready",       label: "Ready for Delivery", desc: "Your order is packed and ready to go!", icon: "fas fa-box-open" },
+  { key: "Delivered",   label: "Delivered",        desc: "Your order has been delivered. Enjoy! 🎂", icon: "fas fa-heart" },
+];
+
+window.addEventListener("load", () => {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  if (id) {
+    document.getElementById("orderIdInput").value = id;
+    trackOrder();
+  }
+});
+
+async function trackOrder() {
+  const id = document.getElementById("orderIdInput").value.trim();
+  if (!id) { alert("Please enter your Order ID"); return; }
+
+  const btn = document.getElementById("trackBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Tracking…';
+  document.getElementById("errorCard").classList.remove("show");
+  document.getElementById("resultCard").classList.remove("show");
+
+  try {
+    const r = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "trackOrder", orderID: id }) });
+    const res = await r.json();
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-search"></i> Track Order';
+
+    if (res.success) {
+      renderResult(res.order);
+    } else {
+      document.getElementById("errorMsg").textContent = res.msg || "Order not found. Please check your Order ID.";
+      document.getElementById("errorCard").classList.add("show");
+    }
+  } catch (e) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-search"></i> Track Order';
+    document.getElementById("errorMsg").textContent = "Connection error. Please try again.";
+    document.getElementById("errorCard").classList.add("show");
+  }
+}
+
+function renderResult(o) {
+  document.getElementById("displayOrderId").textContent = o.OrderID;
+  document.getElementById("customerName").textContent = o.CustomerName;
+  document.getElementById("deliveryDate").textContent = o.DeliveryDate || "To be confirmed";
+  document.getElementById("orderDate").textContent = fmtDate(o.Timestamp);
+  document.getElementById("lastUpdated").textContent = fmtDate(o.LastUpdated);
+  document.getElementById("itemsSummary").textContent = o.ItemsSummary || "—";
+  document.getElementById("totalAmount").textContent = `₹${Number(o.TotalAmount || 0).toLocaleString()}`;
+
+  // Payment badge
+  const ps = o.PaymentStatus || "";
+  let payClass = "pay-pending", payIcon = "fa-clock";
+  if (ps === "Paid") { payClass = "pay-paid"; payIcon = "fa-check-circle"; }
+  else if (ps.includes("Reject")) { payClass = "pay-rejected"; payIcon = "fa-times-circle"; }
+  document.getElementById("payStatus").innerHTML =
+    `<span class="pay-status ${payClass}"><i class="fas ${payIcon}"></i> ${ps}</span>`;
+
+  // Tracker
+  const currentIdx = STATUSES.findIndex(s => s.key === o.OrderStatus);
+  const isCancelled = o.OrderStatus === "Cancelled";
+
+  let stepsHtml = "";
+  if (isCancelled) {
+    stepsHtml = `
+      <div class="step active">
+        <div class="step-dot" style="background:#b71c1c;"><i class="fas fa-times" style="font-size:.6rem;color:#fff;"></i></div>
+        <div class="step-content">
+          <h5 style="color:#b71c1c;">Order Cancelled</h5>
+          <p>Your order has been cancelled. Please contact us if you have queries.</p>
+        </div>
+      </div>`;
+  } else {
+    stepsHtml = STATUSES.map((s, i) => {
+      const isDone = i < currentIdx;
+      const isActive = i === currentIdx;
+      const cls = isDone ? "done" : isActive ? "active" : "";
+      const icon = isDone ? "fa-check" : s.icon;
+      return `
+        <div class="step ${cls}">
+          <div class="step-dot"><i class="fas ${icon}" style="font-size:.6rem;"></i></div>
+          <div class="step-content">
+            <h5>${s.label}</h5>
+            <p>${s.desc}</p>
+            ${isActive ? '<div class="step-time">Current Status</div>' : ""}
+          </div>
+        </div>`;
+    }).join("");
+  }
+  document.getElementById("trackerSteps").innerHTML = stepsHtml;
+
+  document.getElementById("resultCard").classList.add("show");
+  document.getElementById("resultCard").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function fmtDate(d) {
+  if (!d) return "—";
+  try {
+    return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  } catch (e) { return String(d).substring(0, 10); }
+}
+</script>
+</body>
+</html>
