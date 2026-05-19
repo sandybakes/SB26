@@ -40,7 +40,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--deep);
 #loader{position:fixed;inset:0;background:var(--cream);z-index:9999;
   display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;
   transition:opacity .5s,visibility .5s;}
-#loader.hidden{opacity:0;visibility:hidden;}
+#loader.hidden{opacity:0;visibility:hidden;pointer-events:none;}
 #loader img{width:120px;animation:loaderPulse 1.5s ease-in-out infinite;}
 .loader-dots{display:flex;gap:8px;}
 .loader-dots span{width:10px;height:10px;background:var(--crimson);border-radius:50%;
@@ -87,15 +87,23 @@ nav.scrolled{box-shadow:0 4px 24px rgba(161,31,33,.1);}
 .hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px);}
 
 /* ══════════════════════════════════
-   HERO
+   HERO  — FIX: overflow:hidden removed from section,
+   hero-hearts is purely decorative with pointer-events:none
+   so it never blocks the nav or creates layout boxes
 ══════════════════════════════════ */
-#home{min-height:100vh;display:flex;align-items:center;padding-top:68px;
-  position:relative;overflow:hidden;
-  background:linear-gradient(135deg,#fff5f5 0%,#fff8f5 40%,#ffe8e8 100%);}
-.hero-pattern{position:absolute;inset:0;opacity:.04;
+#home{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  padding-top:68px;
+  position:relative;
+  /* REMOVED overflow:hidden — it was clipping nav & creating mystery box */
+  background:linear-gradient(135deg,#fff5f5 0%,#fff8f5 40%,#ffe8e8 100%);
+}
+.hero-pattern{position:absolute;inset:0;opacity:.04;pointer-events:none;
   background-image:radial-gradient(var(--crimson) 1.5px,transparent 1.5px);
-  background-size:28px 28px;}
-.hero-hearts{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+  background-size:28px 28px;z-index:0;}
+.hero-hearts{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
 .hero-heart{position:absolute;color:var(--crimson);font-size:1.2rem;opacity:.08;
   animation:floatHeart linear infinite;}
 @keyframes floatHeart{
@@ -103,7 +111,8 @@ nav.scrolled{box-shadow:0 4px 24px rgba(161,31,33,.1);}
   100%{transform:translateY(-100px) rotate(360deg);opacity:0;}
 }
 .hero-inner{max-width:1280px;margin:0 auto;padding:60px 24px;
-  display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;width:100%;}
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;width:100%;
+  position:relative;z-index:1;}
 .hero-text{animation:fadeUp .8s ease both;}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;
   background:var(--soft-red);color:var(--crimson);
@@ -146,7 +155,7 @@ nav.scrolled{box-shadow:0 4px 24px rgba(161,31,33,.1);}
 @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
 .hero-badge-float{position:absolute;background:#fff;border-radius:14px;
   padding:12px 16px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;
-  animation:float 3s ease-in-out infinite;}
+  animation:float 3s ease-in-out infinite;z-index:2;}
 .hero-badge-float.b1{top:10%;right:-20px;animation-delay:-.5s;}
 .hero-badge-float.b2{bottom:15%;left:-20px;animation-delay:-1.5s;}
 .hbf-icon{width:36px;height:36px;border-radius:10px;background:var(--soft-red);
@@ -316,8 +325,6 @@ section{padding:88px 24px;}
   display:flex;align-items:center;justify-content:center;transition:all var(--transition);}
 .ci-qty-btn:hover{background:var(--crimson);color:#fff;}
 .cart-foot{padding:18px 24px;border-top:2px solid var(--light-gray);}
-.free-del-note{background:#e8f5e9;color:var(--green);font-size:.78rem;font-weight:600;
-  padding:8px 12px;border-radius:8px;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
 .cart-total-row{display:flex;justify-content:space-between;
   font-size:1.05rem;font-weight:700;color:var(--deep);margin-bottom:16px;}
 .btn-checkout{width:100%;background:var(--crimson);color:#fff;border:none;
@@ -390,6 +397,12 @@ section{padding:88px 24px;}
   display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;}
 .btn-submit:hover{background:var(--dark-crimson);}
 .btn-submit:disabled{background:#ccc;cursor:not-allowed;}
+
+/* Screenshot upload progress */
+.upload-progress{display:none;align-items:center;gap:8px;margin-top:8px;
+  font-size:.75rem;color:var(--gray);}
+.upload-progress.show{display:flex;}
+.upload-progress i{color:var(--crimson);}
 
 /* ══════════════════════════════════
    CONTACT
@@ -564,7 +577,7 @@ footer{background:var(--deep);color:#fff;padding:60px 24px 28px;}
   <div class="hero-hearts" id="heroHearts"></div>
   <div class="hero-inner">
     <div class="hero-text">
-      <div class="hero-badge"><i class="fas fa-heart" style="color:var(--crimson);"></i> Handcrafted with Love in Chennai</div>
+      <div class="hero-badge"><i class="fas fa-heart" style="color:var(--crimson);"></i> Handcrafted with Love in Erode</div>
       <h1 class="hero-title">Every Bite<br>Tells a <span class="accent">Story</span></h1>
       <p class="hero-subtitle">From celebration cakes to artisan breads — Sandy Bakes brings joy to every occasion with homemade goodness and fresh daily bakes.</p>
       <div class="hero-cta">
@@ -583,6 +596,14 @@ footer{background:var(--deep);color:#fff;padding:60px 24px 28px;}
         <div class="hero-logo-ring2"></div>
         <img src="https://sandybakes.github.io/SB26/Logo.jpg" alt="Sandy Bakes" class="hero-logo-img"
           onerror="this.src='https://via.placeholder.com/380x380?text=Sandy+Bakes'"/>
+        <div class="hero-badge-float b1">
+          <div class="hbf-icon"><i class="fas fa-star"></i></div>
+          <div class="hbf-text"><div class="t1">Custom Cakes</div><div class="t2">Any occasion</div></div>
+        </div>
+        <div class="hero-badge-float b2">
+          <div class="hbf-icon"><i class="fas fa-leaf"></i></div>
+          <div class="hbf-text"><div class="t1">Fresh Daily</div><div class="t2">Baked every morning</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -604,7 +625,7 @@ footer{background:var(--deep);color:#fff;padding:60px 24px 28px;}
     <div class="about-grid">
       <div class="about-img-side">
         <div class="about-img-frame">
-          <img src="https://sandybakes.github.io/SB26/assets/Home%20made.jpeg" alt="Home Made Products"/>
+          <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600" alt="Sandy Bakes Kitchen"/>
         </div>
         <div class="about-badge-card">
           <span class="big-num">100%</span>
@@ -615,7 +636,7 @@ footer{background:var(--deep);color:#fff;padding:60px 24px 28px;}
         <span class="tag">Our Story</span>
         <h2>Baked with Passion,<br>Served with Love</h2>
         <p>Sandy Bakes was born from a deep love of baking and a passion for bringing smiles to people's faces. Every cake, every pastry, every cookie is crafted with the finest ingredients and plenty of heart.</p>
-        <p>We specialize in custom celebration cakes, artisan breads, and irresistible cookies & cupcakes — all made fresh to order from our home kitchen in Chennai.</p>
+        <p>We specialize in custom celebration cakes, artisan breads, and irresistible cookies & cupcakes — all made fresh to order from our home kitchen in Erode.</p>
         <div class="about-highlights">
           <div class="about-hl"><i class="fas fa-check-circle"></i><span>Premium quality ingredients</span></div>
           <div class="about-hl"><i class="fas fa-check-circle"></i><span>Custom designs available</span></div>
@@ -685,11 +706,11 @@ footer{background:var(--deep);color:#fff;padding:60px 24px 28px;}
           </div>
           <div class="info-item">
             <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
-            <div class="info-text"><h4>Location</h4><span>Chennai, Tamil Nadu, India</span></div>
+            <div class="info-text"><h4>Location</h4><span>Erode, Tamil Nadu, India</span></div>
           </div>
           <div class="info-item">
             <div class="info-icon"><i class="fas fa-clock"></i></div>
-            <div class="info-text"><h4>Hours</h4><span>Mon–Sat</span></div>
+            <div class="info-text"><h4>Hours</h4><span>Mon–Sat: 8AM – 8PM<br>Sunday: Special Orders Only</span></div>
           </div>
         </div>
       </div>
@@ -719,7 +740,7 @@ footer{background:var(--deep);color:#fff;padding:60px 24px 28px;}
             onerror="this.src='https://via.placeholder.com/48x48?text=SB'"/>
           <span class="brand">Sandy Bakes</span>
         </div>
-        <p>Handcrafted baked goods made with love in Chennai, Tamil Nadu. Custom cakes, fresh breads, and delightful cookies for every occasion.</p>
+        <p>Handcrafted baked goods made with love in Erode, Tamil Nadu. Custom cakes, fresh breads, and delightful cookies for every occasion.</p>
         <div class="footer-social">
           <a href="https://wa.me/919361373386" class="social-btn" target="_blank"><i class="fab fa-whatsapp"></i></a>
           <a href="mailto:sandybakes2026@gmail.com" class="social-btn"><i class="fas fa-envelope"></i></a>
@@ -737,14 +758,14 @@ footer{background:var(--deep);color:#fff;padding:60px 24px 28px;}
       </div>
       <div class="footer-col">
         <h4>Categories</h4>
-        <a href="#products" onclick="setCategory(document.querySelector('.filter-tab'),'All')">🎂 Cakes</a>
+        <a href="#products">🎂 Cakes</a>
         <a href="#products">🥐 Breads & Pastries</a>
         <a href="#products">🍪 Cookies & Cupcakes</a>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 20256 Sandy Bakes. All rights reserved. Baked with ❤️</span>
-      <span>Chennai, Tamil Nadu | 9361373386</span>
+      <span>© 2025 Sandy Bakes. All rights reserved. Baked with ❤️</span>
+      <span>Erode, Tamil Nadu | 9361373386</span>
     </div>
   </div>
 </footer>
@@ -798,8 +819,8 @@ footer{background:var(--deep);color:#fff;padding:60px 24px 28px;}
         </div>
         <div class="form-group">
           <label>Delivery Address <span class="req">*</span></label>
-          <textarea id="oAddress" placeholder="Full address with landmark (for our records)…"></textarea>
-          <div class="form-hint">No delivery charge applied — we just need your address for coordination</div>
+          <textarea id="oAddress" placeholder="Full address with landmark…"></textarea>
+          <div class="form-hint">No delivery charge — we just need your address for coordination</div>
         </div>
       </div>
 
@@ -862,9 +883,12 @@ footer{background:var(--deep);color:#fff;padding:60px 24px 28px;}
             <input type="text" id="oUpiTxn" placeholder="12-digit Transaction ID"/>
           </div>
           <div class="form-group">
-            <label>Payment Screenshot Link <small style="color:var(--gray);">(optional)</small></label>
-            <input type="url" id="oScreenshot" placeholder="Paste Google Drive / cloud link"/>
-            <div class="form-hint">Upload screenshot to Google Drive and paste shareable link</div>
+            <label>Payment Screenshot <small style="color:var(--gray);">(optional but recommended)</small></label>
+            <input type="file" id="oScreenshotFile" accept="image/*"/>
+            <div class="upload-progress" id="uploadProgress">
+              <i class="fas fa-spinner fa-spin"></i> Uploading screenshot…
+            </div>
+            <div class="form-hint">Upload your payment screenshot for faster verification</div>
           </div>
         </div>
       </div>
@@ -907,8 +931,7 @@ window.addEventListener("load", () => {
 
 function setupHearts() {
   const container = document.getElementById("heroHearts");
-  const count = 8;
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < 8; i++) {
     const h = document.createElement("div");
     h.className = "hero-heart";
     h.innerHTML = "♥";
@@ -959,6 +982,8 @@ async function api(body) {
 
 // ══════════════════════════════════
 //  PRODUCTS
+//  FIX: robust stock check — handles string "TRUE"/"true"/boolean true
+//  and stock as string "50" or number 50
 // ══════════════════════════════════
 async function fetchProducts() {
   const res = await api({ action: "getProducts" });
@@ -972,6 +997,16 @@ async function fetchProducts() {
         Could not load products. Please refresh the page.
       </div>`;
   }
+}
+
+// ── STOCK CHECK: normalise whatever the API returns ──────────
+function isInStock(p) {
+  // Available can arrive as boolean true, string "TRUE", string "true"
+  const avail = p.Available === true
+    || String(p.Available).toUpperCase() === "TRUE";
+  // Stock can arrive as number 50 or string "50"
+  const stock = Number(p.Stock);
+  return avail && stock > 0;
 }
 
 function setCategory(btn, cat) {
@@ -1002,7 +1037,7 @@ function renderProducts() {
   }
 
   grid.innerHTML = list.map(p => {
-    const inStock = p.Available === "TRUE" && Number(p.Stock) > 0;
+    const inStock = isInStock(p);   // ← use normalised check
     const cartItem = cart.find(c => c.id === p.ProductID);
     const qty = cartItem ? cartItem.qty : 0;
 
@@ -1011,7 +1046,8 @@ function renderProducts() {
       <div class="product-img-wrap">
         <img src="${sanitizeURL(p.ImageURL)}" alt="${esc(p.Name)}" class="product-img"
           onerror="this.src='https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400'"/>
-        ${p.FeaturedItem === "TRUE" ? '<span class="product-badge featured">⭐ Featured</span>' : ""}
+        ${p.FeaturedItem === "TRUE" || p.FeaturedItem === true
+            ? '<span class="product-badge featured">⭐ Featured</span>' : ""}
         ${!inStock ? '<div class="out-overlay"><span><i class="fas fa-ban"></i> Out of Stock</span></div>' : ""}
       </div>
       <div class="product-body">
@@ -1019,7 +1055,7 @@ function renderProducts() {
         <div class="product-name">${esc(p.Name)}</div>
         <div class="product-desc">${esc(p.Description)}</div>
         <div class="product-price">₹${Number(p.Price).toLocaleString()} <span class="product-unit">${esc(p.Unit)}</span></div>
-        ${p.Customizable === "TRUE"
+        ${(p.Customizable === "TRUE" || p.Customizable === true)
           ? `<div class="product-custom"><i class="fas fa-palette"></i> Customization Available</div>`
           : `<div style="height:20px;"></div>`}
         <div class="product-footer">
@@ -1054,7 +1090,7 @@ function addToCart(id) {
   else cart.push({
     id, name: p.Name, price: Number(p.Price), qty: 1,
     img: p.ImageURL, unit: p.Unit,
-    customizable: p.Customizable === "TRUE",
+    customizable: p.Customizable === "TRUE" || p.Customizable === true,
     customOptions: p.CustomizationOptions || ""
   });
   saveCart();
@@ -1192,24 +1228,37 @@ function selectPay(method) {
   document.getElementById("upiSection").style.display = method === "upi" ? "block" : "none";
 }
 
-async function submitOrder() {
-  const name = document.getElementById("oName").value.trim();
-  const phone = document.getElementById("oPhone").value.trim();
-  const email = document.getElementById("oEmail").value.trim();
-  const address = document.getElementById("oAddress").value.trim();
-  const date = document.getElementById("oDate").value;
-  const slot = document.getElementById("oSlot").value;
-  const message = document.getElementById("oMessage")?.value.trim() || "";
-  const notes = document.getElementById("oNotes")?.value.trim() || "";
-  const upiTxn = document.getElementById("oUpiTxn")?.value.trim() || "";
-  const screenshot = document.getElementById("oScreenshot")?.value.trim() || "";
+// ── FILE → BASE64 helper ─────────────────────────────────────
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload  = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("File read failed"));
+    reader.readAsDataURL(file);
+  });
+}
 
-  if (!name) { showToast("Please enter your name", "error"); return; }
-  if (!/^\d{10}$/.test(phone)) { showToast("Enter a valid 10-digit phone number", "error"); return; }
+// ══════════════════════════════════
+//  SUBMIT ORDER — with screenshot upload
+// ══════════════════════════════════
+async function submitOrder() {
+  const name    = document.getElementById("oName").value.trim();
+  const phone   = document.getElementById("oPhone").value.trim();
+  const email   = document.getElementById("oEmail").value.trim();
+  const address = document.getElementById("oAddress").value.trim();
+  const date    = document.getElementById("oDate").value;
+  const slot    = document.getElementById("oSlot").value;
+  const message = document.getElementById("oMessage")?.value.trim() || "";
+  const notes   = document.getElementById("oNotes")?.value.trim()   || "";
+  const upiTxn  = document.getElementById("oUpiTxn")?.value.trim()  || "";
+
+  // Validation
+  if (!name)                              { showToast("Please enter your name", "error"); return; }
+  if (!/^\d{10}$/.test(phone))            { showToast("Enter a valid 10-digit phone number", "error"); return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast("Enter a valid email address", "error"); return; }
-  if (!address) { showToast("Please enter your address", "error"); return; }
-  if (!date) { showToast("Please select a delivery date", "error"); return; }
-  if (selectedPay === "upi" && !upiTxn) { showToast("Please enter UPI Transaction ID", "error"); return; }
+  if (!address)                           { showToast("Please enter your address", "error"); return; }
+  if (!date)                              { showToast("Please select a delivery date", "error"); return; }
+  if (selectedPay === "upi" && !upiTxn)   { showToast("Please enter UPI Transaction ID", "error"); return; }
 
   const customItems = cart.filter(c => c.customizable);
   const customization = customItems.map(item => {
@@ -1221,17 +1270,51 @@ async function submitOrder() {
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Placing Order…';
 
+  // ── SCREENSHOT UPLOAD (if UPI and file chosen) ────────────
+  let screenshotURL = "";
+  const fileInput = document.getElementById("oScreenshotFile");
+  const file = fileInput && fileInput.files && fileInput.files[0];
+
+  if (file && selectedPay === "upi") {
+    // Show upload indicator
+    document.getElementById("uploadProgress").classList.add("show");
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading screenshot…';
+    try {
+      const base64Full = await toBase64(file);
+      const base64Data = base64Full.split(",")[1]; // strip data:image/...;base64,
+      const upRes = await api({
+        action    : "uploadScreenshot",
+        base64Data,
+        fileName  : file.name,
+        mimeType  : file.type,
+        orderID   : "PENDING"   // will be linked after order is saved
+      });
+      if (upRes.success) {
+        screenshotURL = upRes.url;
+        showToast("Screenshot uploaded ✅", "success");
+      } else {
+        showToast("Screenshot upload failed — order will still be placed", "");
+      }
+    } catch (err) {
+      showToast("Screenshot upload failed — continuing without it", "");
+    }
+    document.getElementById("uploadProgress").classList.remove("show");
+  }
+
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Placing Order…';
+
+  // ── PLACE ORDER ───────────────────────────────────────────
   const res = await api({
-    action: "placeOrder",
+    action        : "placeOrder",
     name, email, phone, address,
-    items: JSON.stringify(cart.map(c => ({
+    items         : JSON.stringify(cart.map(c => ({
       ...c,
       category: allProducts.find(p => p.ProductID === c.id)?.Category || ""
     }))),
-    paymentMethod: selectedPay,
-    upiTxnID: upiTxn,
-    screenshotURL: screenshot,
-    deliveryDate: date + (slot ? " — " + slot : ""),
+    paymentMethod : selectedPay,
+    upiTxnID      : upiTxn,
+    screenshotURL,                    // ← real URL or ""
+    deliveryDate  : date + (slot ? " — " + slot : ""),
     customization,
     specialMessage: message,
     notes
@@ -1278,9 +1361,9 @@ function showSuccessModal(orderID, total) {
 //  CONTACT
 // ══════════════════════════════════
 function sendWhatsApp() {
-  const name = document.getElementById("ctName").value.trim();
+  const name  = document.getElementById("ctName").value.trim();
   const phone = document.getElementById("ctPhone").value.trim();
-  const msg = document.getElementById("ctMsg").value.trim();
+  const msg   = document.getElementById("ctMsg").value.trim();
   if (!name || !phone || !msg) { showToast("Please fill all fields", "error"); return; }
   const text = encodeURIComponent(`Hi Sandy Bakes! 👋\n\nName: ${name}\nPhone: ${phone}\n\nMessage: ${msg}`);
   window.open(`https://wa.me/919361373386?text=${text}`, "_blank");
