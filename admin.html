@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Panel — Sandy Bakes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+:root{
+  --crimson:#A11F21;--dark-crimson:#7a1618;--cream:#fff8f5;
+  --deep:#1a0a0b;--soft-red:#f5e8e8;--gray:#6e6e6e;
+  --light-gray:#f2eded;--green:#2d7a3a;--gold:#d4a843;
+  --blue:#1565c0;--orange:#e65100;--shadow:0 8px 32px rgba(161,31,33,.12);
+  --sidebar:240px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:#f7f1ee;color:var(--deep);}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--crimson);border-radius:3px;}
+
+/* ── LOGIN ── */
+#loginScreen{position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,var(--dark-crimson),var(--crimson));
+  display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-card{background:#fff;border-radius:24px;padding:48px 40px;
+  width:min(420px,100%);box-shadow:0 24px 64px rgba(0,0,0,.25);}
+.login-logo{text-align:center;margin-bottom:32px;}
+.login-logo img{width:80px;height:80px;border-radius:50%;margin-bottom:12px;
+  box-shadow:0 4px 16px rgba(161,31,33,.2);}
+.login-logo h1{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--crimson);}
+.login-logo p{color:var(--gray);font-size:.83rem;margin-top:4px;}
+.login-badge{display:inline-block;background:var(--soft-red);color:var(--crimson);
+  padding:4px 14px;border-radius:50px;font-size:.72rem;font-weight:700;
+  letter-spacing:1px;margin-top:8px;}
+.form-group{margin-bottom:16px;}
+.form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--deep);margin-bottom:6px;}
+.form-group input{width:100%;padding:12px 14px;border:2px solid var(--light-gray);
+  border-radius:10px;font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;
+  transition:border-color .2s;background:var(--cream);}
+.form-group input:focus{border-color:var(--crimson);background:#fff;}
+.btn-login{width:100%;background:var(--crimson);color:#fff;border:none;
+  padding:13px;border-radius:50px;font-size:.95rem;font-weight:700;
+  cursor:pointer;margin-top:8px;font-family:'DM Sans',sans-serif;
+  transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-login:hover{background:var(--dark-crimson);}
+.login-err{color:#b71c1c;font-size:.8rem;text-align:center;margin-top:10px;
+  background:#ffebee;padding:8px 12px;border-radius:8px;display:none;}
+.login-back{text-align:center;margin-top:16px;}
+.login-back a{font-size:.8rem;color:var(--gray);text-decoration:none;}
+.login-back a:hover{color:var(--crimson);}
+
+/* ── APP ── */
+#appScreen{display:none;min-height:100vh;}
+.app-wrap{display:flex;min-height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);background:var(--deep);display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .3s;overflow-y:auto;}
+.sb-logo{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,.06);}
+.sb-logo-inner{display:flex;align-items:center;gap:10px;}
+.sb-logo-inner img{height:36px;border-radius:50%;}
+.sb-logo h2{font-family:'Playfair Display',serif;color:var(--crimson);font-size:1.1rem;}
+.sb-logo p{color:rgba(255,255,255,.35);font-size:.68rem;margin-top:1px;}
+.sb-user{padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex;align-items:center;gap:10px;}
+.user-av{width:38px;height:38px;background:var(--crimson);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;
+  font-size:.85rem;flex-shrink:0;}
+.user-nm{font-size:.82rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-role{font-size:.68rem;color:var(--crimson);}
+.sb-nav{flex:1;padding:10px 0;}
+.nav-btn{display:flex;align-items:center;gap:10px;padding:11px 18px;
+  color:rgba(255,255,255,.55);text-decoration:none;font-size:.82rem;
+  cursor:pointer;transition:all .2s;border:none;background:none;width:100%;text-align:left;
+  font-family:'DM Sans',sans-serif;position:relative;}
+.nav-btn:hover,.nav-btn.active{background:rgba(161,31,33,.15);color:var(--crimson);}
+.nav-btn.active{border-left:3px solid var(--crimson);}
+.nav-btn i{width:16px;text-align:center;}
+.nav-divider{height:1px;background:rgba(255,255,255,.06);margin:8px 14px;}
+.nb-badge{margin-left:auto;background:var(--crimson);color:#fff;border-radius:50px;
+  padding:1px 7px;font-size:.65rem;font-weight:700;}
+.sb-footer{padding:14px 18px;border-top:1px solid rgba(255,255,255,.06);}
+.logout-btn{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.4);
+  background:none;border:none;cursor:pointer;font-size:.82rem;width:100%;
+  padding:8px 0;transition:color .2s;font-family:'DM Sans',sans-serif;}
+.logout-btn:hover{color:#ef5350;}
+
+/* ── MAIN ── */
+.main-content{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+.topbar{background:#fff;padding:14px 24px;display:flex;align-items:center;
+  justify-content:space-between;border-bottom:2px solid var(--light-gray);
+  position:sticky;top:0;z-index:50;gap:12px;flex-wrap:wrap;}
+.topbar h2{font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--deep);}
+.topbar-right{display:flex;align-items:center;gap:14px;}
+.alert-badge{background:var(--soft-red);color:var(--crimson);border-radius:50px;
+  padding:5px 12px;font-size:.75rem;font-weight:700;display:flex;align-items:center;gap:6px;}
+.page-area{padding:24px;flex:1;}
+
+/* ── STAT CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:18px;margin-bottom:24px;}
+.stat-card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(161,31,33,.06);
+  border-left:4px solid var(--crimson);}
+.stat-card.green{border-color:var(--green);}
+.stat-card.blue{border-color:var(--blue);}
+.stat-card.gold{border-color:var(--gold);}
+.stat-label{font-size:.7rem;font-weight:600;color:var(--gray);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:10px;}
+.stat-value{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;
+  color:var(--deep);line-height:1;}
+.stat-sub{font-size:.72rem;color:var(--gray);margin-top:5px;}
+
+/* ── CARDS ── */
+.card{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(161,31,33,.06);
+  overflow:hidden;margin-bottom:20px;border:1px solid rgba(161,31,33,.05);}
+.card-header{padding:16px 20px;border-bottom:2px solid var(--light-gray);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.card-title{font-family:'Playfair Display',serif;font-size:.95rem;color:var(--deep);}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.filter-input{padding:8px 12px;border:2px solid var(--light-gray);border-radius:8px;
+  font-size:.8rem;font-family:'DM Sans',sans-serif;outline:none;background:var(--cream);
+  transition:border-color .2s;width:180px;}
+.filter-input:focus{border-color:var(--crimson);}
+.filter-select{padding:8px 10px;border:2px solid var(--light-gray);border-radius:8px;
+  font-size:.8rem;font-family:'DM Sans',sans-serif;outline:none;background:#fff;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--deep);color:#fff;padding:11px 14px;text-align:left;
+  font-size:.75rem;font-weight:600;letter-spacing:.4px;white-space:nowrap;}
+td{padding:11px 14px;border-bottom:1px solid var(--light-gray);font-size:.82rem;
+  vertical-align:middle;}
+tr:hover td{background:#fdf8f6;}
+.empty-row td{text-align:center;padding:48px;color:var(--gray);}
+
+/* ── STATUS BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+  border-radius:50px;font-size:.7rem;font-weight:700;}
+.b-new{background:#e3f2fd;color:#1565c0;}
+.b-confirmed{background:#e8f5e9;color:var(--green);}
+.b-progress{background:#fff3e0;color:var(--orange);}
+.b-ready{background:#f3e5f5;color:#7b1fa2;}
+.b-delivered{background:#e8f5e9;color:#1b5e20;}
+.b-cancelled{background:#ffebee;color:#b71c1c;}
+.b-paid{background:#e8f5e9;color:var(--green);}
+.b-pending{background:#fff3e0;color:var(--orange);}
+.b-rejected{background:#ffebee;color:#b71c1c;}
+
+/* ── ACTION BUTTONS ── */
+.btn-sm{padding:5px 11px;border-radius:6px;border:none;cursor:pointer;
+  font-size:.75rem;font-weight:700;transition:all .2s;font-family:'DM Sans',sans-serif;
+  display:inline-flex;align-items:center;gap:4px;}
+.btn-approve{background:#e8f5e9;color:var(--green);}
+.btn-approve:hover{background:var(--green);color:#fff;}
+.btn-reject{background:#ffebee;color:#b71c1c;}
+.btn-reject:hover{background:#b71c1c;color:#fff;}
+.btn-view{background:#e3f2fd;color:#1565c0;}
+.btn-view:hover{background:#1565c0;color:#fff;}
+.btn-edit{background:#fff3e0;color:var(--orange);}
+.btn-edit:hover{background:var(--orange);color:#fff;}
+.btn-del{background:#ffebee;color:#b71c1c;}
+.btn-del:hover{background:#b71c1c;color:#fff;}
+.btn-primary-sm{background:var(--crimson);color:#fff;padding:8px 16px;border-radius:8px;
+  border:none;cursor:pointer;font-weight:700;font-size:.8rem;font-family:'DM Sans',sans-serif;
+  display:inline-flex;align-items:center;gap:6px;transition:background .2s;}
+.btn-primary-sm:hover{background:var(--dark-crimson);}
+.btn-gold-sm{background:var(--gold);color:var(--deep);padding:8px 16px;border-radius:8px;
+  border:none;cursor:pointer;font-weight:700;font-size:.8rem;font-family:'DM Sans',sans-serif;
+  display:inline-flex;align-items:center;gap:6px;transition:all .2s;}
+.btn-gold-sm:hover{background:#c49030;}
+.status-select{padding:5px 8px;border:2px solid var(--light-gray);border-radius:6px;
+  font-size:.75rem;font-family:'DM Sans',sans-serif;outline:none;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:#fff;border-radius:20px;width:min(660px,100%);
+  max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.25);}
+.modal-head{background:var(--crimson);padding:20px 24px;display:flex;
+  align-items:center;justify-content:space-between;
+  border-radius:20px 20px 0 0;position:sticky;top:0;z-index:1;}
+.modal-head h3{font-family:'Playfair Display',serif;color:#fff;font-size:1.15rem;}
+.modal-close{background:rgba(255,255,255,.2);border:none;color:#fff;
+  width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:.85rem;
+  display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.modal-close:hover{background:rgba(255,255,255,.35);}
+.modal-body{padding:22px;}
+.detail-row{display:flex;padding:9px 0;border-bottom:1px solid var(--light-gray);
+  font-size:.83rem;gap:12px;}
+.detail-row:last-child{border:none;}
+.dl-label{color:var(--gray);font-weight:600;min-width:140px;flex-shrink:0;}
+.modal-foot{padding:16px 22px;border-top:2px solid var(--light-gray);
+  display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fg{margin-bottom:12px;}
+.fg label{display:block;font-size:.77rem;font-weight:600;color:var(--deep);margin-bottom:5px;}
+.fg input,.fg select,.fg textarea{width:100%;padding:10px 12px;border:2px solid var(--light-gray);
+  border-radius:8px;font-size:.85rem;font-family:'DM Sans',sans-serif;outline:none;
+  transition:border-color .2s;background:var(--cream);}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--crimson);background:#fff;}
+
+/* ── CHART ── */
+.chart-bars{display:flex;align-items:flex-end;gap:10px;height:100px;padding:0 4px;}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bar{width:100%;background:var(--crimson);border-radius:4px 4px 0 0;min-height:4px;
+  transition:height .5s ease;}
+.bar-count{font-size:.65rem;color:var(--gray);}
+.bar-lbl{font-size:.6rem;color:var(--gray);text-align:center;white-space:nowrap;}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;
+  display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--deep);color:#fff;padding:12px 18px;border-radius:10px;
+  font-size:.83rem;box-shadow:0 8px 24px rgba(0,0,0,.3);max-width:300px;
+  transform:translateX(120%);transition:transform .35s;
+  border-left:4px solid var(--crimson);}
+.toast.show{transform:translateX(0);}
+.toast.success{border-left-color:#4caf50;}
+.toast.error{border-left-color:#ef5350;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main-content{margin-left:0;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .form-row{grid-template-columns:1fr;}
+  .topbar{padding:12px 16px;}
+}
+</style>
+</head>
+<body>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="https://sandybakes.github.io/SB26/Logo.jpg" alt="Sandy Bakes"
+        onerror="this.src='https://via.placeholder.com/80x80?text=SB'"/>
+      <h1>Sandy Bakes</h1>
+      <p>Admin Management System</p>
+      <span class="login-badge">Admin Portal</span>
+    </div>
+    <div class="form-group">
+      <label>Username / Email / Staff ID</label>
+      <input type="text" id="loginUser" placeholder="Email or Staff ID" autocomplete="username"
+        onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Your password" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="btn-login" onclick="doLogin()"><i class="fas fa-lock"></i> Sign In</button>
+    <div class="login-err" id="loginErr"><i class="fas fa-exclamation-circle"></i> <span id="loginErrMsg"></span></div>
+    <div class="login-back"><a href="index.html"><i class="fas fa-arrow-left"></i> Back to Sandy Bakes</a></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appScreen">
+<div class="app-wrap">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-inner">
+        <img src="https://sandybakes.github.io/SB26/Logo.jpg" alt="Sandy Bakes"
+          onerror="this.src='https://via.placeholder.com/36x36?text=SB'"/>
+        <div><h2>Sandy Bakes</h2><p>Admin Panel</p></div>
+      </div>
+    </div>
+    <div class="sb-user">
+      <div class="user-av" id="userAv">SA</div>
+      <div>
+        <div class="user-nm" id="userName">Admin</div>
+        <div class="user-role" id="userRole">Super Admin</div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <button class="nav-btn active" onclick="showPage('dashboard',event)">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </button>
+      <button class="nav-btn" onclick="showPage('orders',event)">
+        <i class="fas fa-bag-shopping"></i> All Orders
+        <span class="nb-badge" id="newBadge" style="display:none;"></span>
+      </button>
+      <button class="nav-btn" onclick="showPage('payments',event)" id="navPay">
+        <i class="fas fa-credit-card"></i> Payment Approvals
+        <span class="nb-badge" id="payBadge" style="display:none;"></span>
+      </button>
+      <div class="nav-divider"></div>
+      <button class="nav-btn" onclick="showPage('products',event)" id="navProd">
+        <i class="fas fa-box-open"></i> Products
+      </button>
+      <button class="nav-btn" onclick="showPage('customers',event)" id="navCust">
+        <i class="fas fa-users"></i> Customers
+      </button>
+      <button class="nav-btn" onclick="showPage('reports',event)">
+        <i class="fas fa-chart-bar"></i> Reports
+      </button>
+    </nav>
+    <div class="sb-footer">
+      <a href="index.html" style="display:flex;align-items:center;gap:8px;color:rgba(255,255,255,.35);
+        text-decoration:none;font-size:.78rem;margin-bottom:10px;">
+        <i class="fas fa-external-link-alt"></i> View Store
+      </a>
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <h2 id="pageTitle">Dashboard</h2>
+      <div class="topbar-right">
+        <span id="pendingAlert" style="display:none;" class="alert-badge">
+          <i class="fas fa-bell"></i> <span id="pendingCount">0</span> pending payments
+        </span>
+      </div>
+    </div>
+    <div class="page-area">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard">
+        <div class="stats-grid" id="dashStats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Orders by Status</span></div>
+            <div style="padding:20px;" id="statusChart"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Recent Orders</span></div>
+            <div class="table-wrap">
+              <table id="recentTable">
+                <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORDERS -->
+      <div id="page-orders" style="display:none;">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">All Orders</span>
+            <div class="filters">
+              <input type="text" class="filter-input" placeholder="Search order / customer…" oninput="renderOrders()"/>
+              <select class="filter-select" id="oStatusF" onchange="renderOrders()">
+                <option value="">All Statuses</option>
+                <option>New</option><option>Confirmed</option><option>In Progress</option>
+                <option>Ready</option><option>Delivered</option><option>Cancelled</option>
+              </select>
+              <select class="filter-select" id="oPayF" onchange="renderOrders()">
+                <option value="">All Payments</option>
+                <option>Pending Cash</option><option>Pending Verification</option>
+                <option>Paid</option><option>Rejected</option>
+              </select>
+              <button class="btn-primary-sm" onclick="loadOrders()"><i class="fas fa-sync-alt"></i></button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="ordersTable">
+              <thead><tr>
+                <th>Order ID</th><th>Date</th><th>Customer</th><th>Items</th>
+                <th>Total</th><th>Payment</th><th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENTS -->
+      <div id="page-payments" style="display:none;">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Payment Approvals</span>
+            <div class="filters">
+              <input type="text" class="filter-input" placeholder="Search…" oninput="renderPayments()"/>
+              <button class="btn-primary-sm" onclick="loadOrders()"><i class="fas fa-sync-alt"></i></button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="paymentsTable">
+              <thead><tr>
+                <th>Order ID</th><th>Customer</th><th>Amount</th>
+                <th>Method</th><th>UPI Txn ID</th><th>Screenshot</th>
+                <th>Status</th><th>Actions</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div id="page-products" style="display:none;">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Product Catalogue</span>
+            <div class="filters">
+              <input type="text" class="filter-input" placeholder="Search product…" oninput="renderProducts()"/>
+              <select class="filter-select" id="pCatF" onchange="renderProducts()">
+                <option value="">All Categories</option>
+                <option>Cakes</option>
+                <option>Breads & Pastries</option>
+                <option>Cookies & Cupcakes</option>
+              </select>
+              <button class="btn-gold-sm" onclick="openProductModal()" id="addProdBtn">
+                <i class="fas fa-plus"></i> Add Product
+              </button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="productsTable">
+              <thead><tr>
+                <th>Image</th><th>ID</th><th>Name</th><th>Category</th>
+                <th>Price</th><th>Stock</th><th>Available</th><th>Actions</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <div id="page-customers" style="display:none;">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Customer Records</span>
+            <div class="filters">
+              <input type="text" class="filter-input" placeholder="Search customer…" oninput="renderCustomers()"/>
+              <button class="btn-primary-sm" onclick="loadCustomers()"><i class="fas fa-sync-alt"></i></button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table id="customersTable">
+              <thead><tr>
+                <th>Name</th><th>Email</th><th>Phone</th>
+                <th>Total Orders</th><th>Total Spend</th><th>Last Order</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div id="page-reports" style="display:none;">
+        <div class="stats-grid" id="reportStats"></div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Orders Breakdown by Status</span></div>
+          <div style="padding:20px;" id="reportBreakdown"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-overlay" id="detailModal" onclick="handleModalClick(event,'detailModal')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="fas fa-receipt"></i> Order Details</h3>
+      <button class="modal-close" onclick="closeModal('detailModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-foot">
+      <select class="filter-select" id="detailStatusSel"></select>
+      <input type="text" class="filter-input" id="detailNote" placeholder="Note (optional)" style="width:150px;"/>
+      <button class="btn-primary-sm" onclick="updateFromDetail()">Update Status</button>
+      <button class="btn-sm btn-view" onclick="closeModal('detailModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="productModal" onclick="handleModalClick(event,'productModal')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="prodModalTitle"><i class="fas fa-box"></i> Add Product</h3>
+      <button class="modal-close" onclick="closeModal('productModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pID"/>
+      <div class="form-row">
+        <div class="fg"><label>Product Name *</label><input type="text" id="pName" placeholder="e.g. Chocolate Truffle Cake"/></div>
+        <div class="fg"><label>Category *</label>
+          <select id="pCat"><option>Cakes</option><option>Breads & Pastries</option><option>Cookies & Cupcakes</option></select>
+        </div>
+      </div>
+      <div class="fg"><label>Description *</label><textarea id="pDesc" placeholder="Describe the product…"></textarea></div>
+      <div class="form-row">
+        <div class="fg"><label>Price (₹) *</label><input type="number" id="pPrice" placeholder="0"/></div>
+        <div class="fg"><label>Unit</label><input type="text" id="pUnit" placeholder="per kg, per piece…"/></div>
+      </div>
+      <div class="fg"><label>Image URL *</label><input type="url" id="pImage" placeholder="https://…"/></div>
+      <div class="form-row">
+        <div class="fg"><label>Stock Quantity</label><input type="number" id="pStock" placeholder="0"/></div>
+        <div class="fg"><label>Sort Order</label><input type="number" id="pSort" placeholder="1"/></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>Available</label>
+          <select id="pAvail"><option value="TRUE">Yes</option><option value="FALSE">No</option></select>
+        </div>
+        <div class="fg"><label>Featured Item</label>
+          <select id="pFeatured"><option value="FALSE">No</option><option value="TRUE">Yes</option></select>
+        </div>
+      </div>
+      <div class="fg"><label>Customizable</label>
+        <select id="pCustom" onchange="toggleCustOpts()">
+          <option value="FALSE">No</option><option value="TRUE">Yes</option>
+        </select>
+      </div>
+      <div class="fg" id="custOptGrp" style="display:none;">
+        <label>Customization Options (comma-separated)</label>
+        <input type="text" id="pCustomOpts" placeholder="Birthday,Anniversary,Farewell,Baby Shower,Custom"/>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-primary-sm" onclick="saveProduct()"><i class="fas fa-save"></i> Save</button>
+      <button class="btn-sm btn-view" onclick="closeModal('productModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzK6MgBg1IHFcUjF90UmPjZDDDGtbJmOhV-iHp7qsx04vhzpvTRqQm8dDVz2UKyRPtv9Q/exec";
+
+let session = null;
+let allOrders = [], allProds = [], allCusts = [];
+let currentOrderID = null;
+
+// ── INIT ──
+window.addEventListener("load", () => {
+  const saved = sessionStorage.getItem("sb_admin");
+  if (saved) { session = JSON.parse(saved); startApp(); }
+});
+
+// ── AUTH ──
+async function doLogin() {
+  const username = sanitize(document.getElementById("loginUser").value.trim());
+  const password = document.getElementById("loginPass").value;
+  if (!username || !password) { showLoginErr("Please enter credentials"); return; }
+  const res = await api({ action: "adminLogin", username, password });
+  if (res.success) {
+    session = { role: res.role, name: res.name, username: res.username };
+    sessionStorage.setItem("sb_admin", JSON.stringify(session));
+    startApp();
+  } else {
+    showLoginErr("Invalid credentials. Please try again.");
+    document.getElementById("loginPass").value = "";
+  }
+}
+function showLoginErr(msg) {
+  document.getElementById("loginErrMsg").textContent = msg;
+  document.getElementById("loginErr").style.display = "block";
+}
+function startApp() {
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("appScreen").style.display = "block";
+  const initials = session.name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+  document.getElementById("userAv").textContent = initials;
+  document.getElementById("userName").textContent = session.name;
+  document.getElementById("userRole").textContent = session.role === "superadmin" ? "Super Admin" : "Manager";
+  if (session.role !== "superadmin") {
+    document.getElementById("navProd").style.display = "none";
+    document.getElementById("navCust").style.display = "none";
+    document.getElementById("navPay").style.display = "block";
+  }
+  loadDashboard();
+}
+function logout() {
+  if (!confirm("Sign out of Sandy Bakes Admin?")) return;
+  sessionStorage.removeItem("sb_admin");
+  session = null;
+  document.getElementById("loginScreen").style.display = "flex";
+  document.getElementById("appScreen").style.display = "none";
+  document.getElementById("loginUser").value = "";
+  document.getElementById("loginPass").value = "";
+  document.getElementById("loginErr").style.display = "none";
+}
+
+// ── NAV ──
+function showPage(name, e) {
+  document.querySelectorAll(".page-area > div").forEach(d => d.style.display = "none");
+  document.getElementById("page-" + name).style.display = "block";
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  if (e && e.currentTarget) e.currentTarget.classList.add("active");
+  const titles = { dashboard: "Dashboard", orders: "All Orders", payments: "Payment Approvals", products: "Products", customers: "Customers", reports: "Reports" };
+  document.getElementById("pageTitle").textContent = titles[name] || name;
+  if (name === "dashboard") loadDashboard();
+  if (name === "orders") loadOrders();
+  if (name === "payments") loadOrders();
+  if (name === "products") loadProductsData();
+  if (name === "customers") loadCustomers();
+  if (name === "reports") loadReports();
+}
+
+// ── API ──
+async function api(body) {
+  try {
+    const r = await fetch(API_URL, { method: "POST", body: JSON.stringify(body) });
+    return await r.json();
+  } catch (e) { return { success: false, msg: "Connection error" }; }
+}
+
+// ── DASHBOARD ──
+async function loadDashboard() {
+  const res = await api({ action: "getReports", role: session.role });
+  if (!res.success) return;
+  const r = res.report;
+  const pending = r.pendingPayments || 0;
+  if (pending > 0) {
+    document.getElementById("pendingAlert").style.display = "flex";
+    document.getElementById("pendingCount").textContent = pending;
+  }
+  document.getElementById("payBadge").textContent = pending || "";
+  document.getElementById("payBadge").style.display = pending ? "inline" : "none";
+  const newCount = r.ordersByStatus?.New || 0;
+  document.getElementById("newBadge").textContent = newCount || "";
+  document.getElementById("newBadge").style.display = newCount ? "inline" : "none";
+
+  document.getElementById("dashStats").innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value">${r.totalOrders}</div><div class="stat-sub">All time</div></div>
+    <div class="stat-card green"><div class="stat-label">Total Revenue</div><div class="stat-value">₹${(r.totalRevenue || 0).toLocaleString()}</div><div class="stat-sub">Paid orders</div></div>
+    <div class="stat-card blue"><div class="stat-label">This Month</div><div class="stat-value">${r.monthOrders}</div><div class="stat-sub">₹${(r.monthRevenue || 0).toLocaleString()}</div></div>
+    <div class="stat-card"><div class="stat-label">Today</div><div class="stat-value">${r.todayOrders}</div><div class="stat-sub">Orders today</div></div>
+    <div class="stat-card gold"><div class="stat-label">Pending Pay</div><div class="stat-value">${pending}</div><div class="stat-sub">Awaiting approval</div></div>
+    <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value">${r.weekOrders}</div><div class="stat-sub">Orders this week</div></div>`;
+
+  const byS = r.ordersByStatus || {};
+  const statuses = ["New", "Confirmed", "In Progress", "Ready", "Delivered", "Cancelled"];
+  const maxV = Math.max(1, ...Object.values(byS));
+  document.getElementById("statusChart").innerHTML = `
+    <div class="chart-bars">
+      ${statuses.map(s => `
+        <div class="bar-wrap">
+          <div class="bar-count">${byS[s] || 0}</div>
+          <div class="bar" style="height:${Math.round((byS[s] || 0) / maxV * 88)}px;"></div>
+          <div class="bar-lbl">${s}</div>
+        </div>`).join("")}
+    </div>`;
+
+  const tbody = document.querySelector("#recentTable tbody");
+  tbody.innerHTML = (r.recentOrders || []).map(o => `
+    <tr>
+      <td><code style="font-size:.75rem;">${esc(o.OrderID)}</code></td>
+      <td>${esc(o.CustomerName)}</td>
+      <td>₹${Number(o.TotalAmount || 0).toLocaleString()}</td>
+      <td>${statusBadge(o.OrderStatus)}</td>
+    </tr>`).join("") || `<tr class="empty-row"><td colspan="4">No orders yet</td></tr>`;
+}
+
+// ── ORDERS ──
+async function loadOrders() {
+  const res = await api({ action: "getOrders", role: session.role });
+  if (!res.success) { showToast(res.msg, "error"); return; }
+  allOrders = res.orders;
+  renderOrders();
+  renderPayments();
+}
+function renderOrders() {
+  const search = (document.querySelector("#page-orders .filter-input")?.value || "").toLowerCase();
+  const statF = document.getElementById("oStatusF")?.value || "";
+  const payF = document.getElementById("oPayF")?.value || "";
+  let list = allOrders;
+  if (search) list = list.filter(o => (o.OrderID + o.CustomerName + o.CustomerPhone).toLowerCase().includes(search));
+  if (statF) list = list.filter(o => o.OrderStatus === statF);
+  if (payF) list = list.filter(o => o.PaymentStatus === payF);
+
+  const tbody = document.querySelector("#ordersTable tbody");
+  tbody.innerHTML = list.map(o => `
+    <tr>
+      <td><code style="font-size:.73rem;">${esc(o.OrderID)}</code></td>
+      <td>${fmtDate(o.Timestamp)}</td>
+      <td><strong>${esc(o.CustomerName)}</strong><br><span style="font-size:.73rem;color:var(--gray);">${esc(o.CustomerPhone)}</span></td>
+      <td style="max-width:160px;font-size:.78rem;color:var(--gray);">${esc(o.ItemsSummary || "")}</td>
+      <td><strong>₹${Number(o.TotalAmount || 0).toLocaleString()}</strong></td>
+      <td>${payBadge(o.PaymentStatus)}</td>
+      <td>
+        <select class="status-select" onchange="quickStatus('${esc(o.OrderID)}',this.value)">
+          ${["New","Confirmed","In Progress","Ready","Delivered","Cancelled"].map(s =>
+            `<option value="${s}" ${o.OrderStatus === s ? "selected" : ""}>${s}</option>`).join("")}
+        </select>
+      </td>
+      <td>
+        <button class="btn-sm btn-view" onclick="viewDetail('${esc(o.OrderID)}')"><i class="fas fa-eye"></i></button>
+      </td>
+    </tr>`).join("") || `<tr class="empty-row"><td colspan="8">No orders found</td></tr>`;
+}
+
+function renderPayments() {
+  const search = (document.querySelector("#page-payments .filter-input")?.value || "").toLowerCase();
+  let list = allOrders.filter(o => o.PaymentMethod === "upi" || (o.PaymentStatus && o.PaymentStatus.includes("Pending")));
+  if (search) list = list.filter(o => (o.OrderID + o.CustomerName).toLowerCase().includes(search));
+
+  const tbody = document.querySelector("#paymentsTable tbody");
+  tbody.innerHTML = list.map(o => `
+    <tr>
+      <td><code style="font-size:.73rem;">${esc(o.OrderID)}</code></td>
+      <td>${esc(o.CustomerName)}<br><span style="font-size:.72rem;color:var(--gray);">${esc(o.CustomerEmail || "")}</span></td>
+      <td><strong>₹${Number(o.TotalAmount || 0).toLocaleString()}</strong></td>
+      <td>${esc(o.PaymentMethod === "upi" ? "UPI" : "Cash")}</td>
+      <td><code style="font-size:.72rem;">${esc(o.UPITransactionID || "—")}</code></td>
+      <td>${o.PaymentScreenshot
+        ? `<a href="${sanitizeURL(o.PaymentScreenshot)}" target="_blank" class="btn-sm btn-view"><i class="fas fa-image"></i></a>`
+        : "—"}</td>
+      <td>${payBadge(o.PaymentStatus)}</td>
+      <td style="white-space:nowrap;">
+        ${o.PaymentStatus === "Pending Verification"
+          ? `<button class="btn-sm btn-approve" onclick="approvePayment('${esc(o.OrderID)}')"><i class="fas fa-check"></i> Approve</button>
+             <button class="btn-sm btn-reject" onclick="rejectPayment('${esc(o.OrderID)}')"><i class="fas fa-times"></i> Reject</button>`
+          : `<span style="color:var(--gray);font-size:.78rem;">${esc(o.PaymentStatus || "")}</span>`}
+      </td>
+    </tr>`).join("") || `<tr class="empty-row"><td colspan="8">No UPI payments pending</td></tr>`;
+}
+
+async function quickStatus(orderID, newStatus) {
+  const res = await api({ action: "updateOrderStatus", role: session.role, username: session.username, orderID, newStatus });
+  if (res.success) showToast(`Order ${orderID} → ${newStatus}`, "success");
+  else showToast(res.msg, "error");
+}
+
+function viewDetail(orderID) {
+  currentOrderID = orderID;
+  const o = allOrders.find(x => x.OrderID === orderID);
+  if (!o) return;
+  let items = [];
+  try { items = JSON.parse(o.Items || "[]"); } catch (e) {}
+  document.getElementById("detailBody").innerHTML = `
+    ${row("Order ID", `<code>${esc(o.OrderID)}</code>`)}
+    ${row("Date", fmtDate(o.Timestamp))}
+    ${row("Customer", esc(o.CustomerName))}
+    ${row("Phone", esc(o.CustomerPhone))}
+    ${row("Email", esc(o.CustomerEmail))}
+    ${row("Address", esc(o.CustomerAddress))}
+    ${row("Delivery Date", esc(o.DeliveryDate || "—"))}
+    ${row("Items", items.map(i => `${esc(i.name)} × ${i.qty} — ₹${(i.price * i.qty).toLocaleString()}`).join("<br>"))}
+    ${row("Subtotal", `₹${Number(o.Subtotal || 0).toLocaleString()}`)}
+    ${row("Delivery", "FREE")}
+    ${row("TOTAL", `<strong>₹${Number(o.TotalAmount || 0).toLocaleString()}</strong>`)}
+    ${row("Payment", `${esc(o.PaymentMethod)} | ${payBadge(o.PaymentStatus)}`)}
+    ${row("UPI Txn ID", `<code>${esc(o.UPITransactionID || "—")}</code>`)}
+    ${o.PaymentScreenshot ? row("Screenshot", `<a href="${sanitizeURL(o.PaymentScreenshot)}" target="_blank" class="btn-sm btn-view"><i class="fas fa-external-link-alt"></i> View</a>`) : ""}
+    ${row("Customization", esc(o.CustomizationDetails || "—"))}
+    ${row("Special Message", esc(o.SpecialMessage || "—"))}
+    ${row("Notes", esc(o.Notes || "—"))}
+    ${row("Order Status", statusBadge(o.OrderStatus))}`;
+
+  const sel = document.getElementById("detailStatusSel");
+  sel.innerHTML = ["New","Confirmed","In Progress","Ready","Delivered","Cancelled"]
+    .map(s => `<option value="${s}" ${o.OrderStatus === s ? "selected" : ""}>${s}</option>`).join("");
+  document.getElementById("detailModal").classList.add("open");
+}
+function row(label, val) {
+  return `<div class="detail-row"><span class="dl-label">${label}</span><span>${val}</span></div>`;
+}
+async function updateFromDetail() {
+  const newStatus = document.getElementById("detailStatusSel").value;
+  const note = document.getElementById("detailNote").value.trim();
+  const res = await api({ action: "updateOrderStatus", role: session.role, username: session.username, orderID: currentOrderID, newStatus, notes: note });
+  if (res.success) { showToast("Status updated!", "success"); closeModal("detailModal"); loadOrders(); }
+  else showToast(res.msg, "error");
+}
+async function approvePayment(orderID) {
+  if (!confirm("Approve payment for " + orderID + "?")) return;
+  const res = await api({ action: "approvePayment", role: session.role, username: session.username, orderID });
+  if (res.success) { showToast("Payment Approved! ✅", "success"); loadOrders(); loadDashboard(); }
+  else showToast(res.msg, "error");
+}
+async function rejectPayment(orderID) {
+  const reason = prompt("Reason for rejection (optional):");
+  if (reason === null) return;
+  const res = await api({ action: "rejectPayment", role: session.role, username: session.username, orderID, reason });
+  if (res.success) { showToast("Payment Rejected", "error"); loadOrders(); }
+  else showToast(res.msg, "error");
+}
+
+// ── PRODUCTS ──
+async function loadProductsData() {
+  const res = await api({ action: "getProducts_admin", role: session.role });
+  if (!res.success) return;
+  allProds = res.products;
+  renderProducts();
+}
+function renderProducts() {
+  const search = (document.querySelector("#page-products .filter-input")?.value || "").toLowerCase();
+  const cat = document.getElementById("pCatF")?.value || "";
+  let list = allProds;
+  if (search) list = list.filter(p => (p.Name + p.ProductID).toLowerCase().includes(search));
+  if (cat) list = list.filter(p => p.Category === cat);
+  const tbody = document.querySelector("#productsTable tbody");
+  tbody.innerHTML = list.map(p => `
+    <tr>
+      <td><img src="${sanitizeURL(p.ImageURL)}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;"
+        onerror="this.src='https://via.placeholder.com/44x44?text=SB'"/></td>
+      <td><code style="font-size:.72rem;">${esc(p.ProductID)}</code></td>
+      <td><strong>${esc(p.Name)}</strong>${p.FeaturedItem === "TRUE" ? ' <span style="color:var(--gold);">⭐</span>' : ""}</td>
+      <td>${esc(p.Category)}</td>
+      <td>₹${Number(p.Price || 0).toLocaleString()} <span style="color:var(--gray);font-size:.72rem;">${esc(p.Unit || "")}</span></td>
+      <td>${p.Available === "TRUE" && Number(p.Stock) > 0
+        ? `<span style="color:var(--green);font-weight:700;">${p.Stock}</span>`
+        : `<span style="color:#b71c1c;font-weight:700;">0</span>`}</td>
+      <td>${p.Available === "TRUE" ? '<span class="badge b-confirmed">Available</span>' : '<span class="badge b-cancelled">Unavailable</span>'}</td>
+      <td style="white-space:nowrap;">
+        ${session.role === "superadmin"
+          ? `<button class="btn-sm btn-edit" onclick='editProduct(${JSON.stringify(p).replace(/'/g,"&#39;")})'><i class="fas fa-edit"></i></button>
+             <button class="btn-sm btn-del" onclick="deleteProd('${esc(p.ProductID)}')"><i class="fas fa-trash"></i></button>`
+          : `<span style="color:var(--gray);font-size:.75rem;">View only</span>`}
+      </td>
+    </tr>`).join("") || `<tr class="empty-row"><td colspan="8">No products found</td></tr>`;
+}
+function openProductModal() {
+  if (session.role !== "superadmin") { showToast("Unauthorized", "error"); return; }
+  document.getElementById("prodModalTitle").innerHTML = '<i class="fas fa-plus"></i> Add Product';
+  ["pID","pName","pDesc","pPrice","pUnit","pImage","pStock","pSort","pCustomOpts"].forEach(id => { document.getElementById(id).value = ""; });
+  document.getElementById("pCat").value = "Cakes";
+  document.getElementById("pAvail").value = "TRUE";
+  document.getElementById("pFeatured").value = "FALSE";
+  document.getElementById("pCustom").value = "FALSE";
+  document.getElementById("custOptGrp").style.display = "none";
+  document.getElementById("productModal").classList.add("open");
+}
+function editProduct(p) {
+  document.getElementById("prodModalTitle").innerHTML = '<i class="fas fa-edit"></i> Edit Product';
+  document.getElementById("pID").value = p.ProductID || "";
+  document.getElementById("pName").value = p.Name || "";
+  document.getElementById("pCat").value = p.Category || "Cakes";
+  document.getElementById("pDesc").value = p.Description || "";
+  document.getElementById("pPrice").value = p.Price || "";
+  document.getElementById("pUnit").value = p.Unit || "";
+  document.getElementById("pImage").value = p.ImageURL || "";
+  document.getElementById("pStock").value = p.Stock || "";
+  document.getElementById("pSort").value = p.SortOrder || "";
+  document.getElementById("pAvail").value = p.Available || "TRUE";
+  document.getElementById("pFeatured").value = p.FeaturedItem || "FALSE";
+  document.getElementById("pCustom").value = p.Customizable || "FALSE";
+  document.getElementById("pCustomOpts").value = p.CustomizationOptions || "";
+  document.getElementById("custOptGrp").style.display = p.Customizable === "TRUE" ? "block" : "none";
+  document.getElementById("productModal").classList.add("open");
+}
+function toggleCustOpts() {
+  document.getElementById("custOptGrp").style.display = document.getElementById("pCustom").value === "TRUE" ? "block" : "none";
+}
+async function saveProduct() {
+  const name = document.getElementById("pName").value.trim();
+  const price = document.getElementById("pPrice").value.trim();
+  const image = document.getElementById("pImage").value.trim();
+  if (!name || !price || !image) { showToast("Name, price and image are required", "error"); return; }
+  const product = {
+    ProductID: document.getElementById("pID").value || "",
+    Name: name, Category: document.getElementById("pCat").value,
+    Description: document.getElementById("pDesc").value.trim(),
+    Price: price, Unit: document.getElementById("pUnit").value.trim(),
+    ImageURL: image, Stock: document.getElementById("pStock").value || "0",
+    SortOrder: document.getElementById("pSort").value || "99",
+    Available: document.getElementById("pAvail").value,
+    FeaturedItem: document.getElementById("pFeatured").value,
+    Customizable: document.getElementById("pCustom").value,
+    CustomizationOptions: document.getElementById("pCustomOpts").value.trim()
+  };
+  const res = await api({ action: "upsertProduct", role: session.role, product });
+  if (res.success) { showToast("Product saved!", "success"); closeModal("productModal"); loadProductsData(); }
+  else showToast(res.msg, "error");
+}
+async function deleteProd(id) {
+  if (!confirm("Delete product " + id + "? This cannot be undone.")) return;
+  const res = await api({ action: "deleteProduct", role: session.role, productID: id });
+  if (res.success) { showToast("Product deleted", "success"); loadProductsData(); }
+  else showToast(res.msg, "error");
+}
+
+// ── CUSTOMERS ──
+async function loadCustomers() {
+  const res = await api({ action: "getCustomers", role: session.role });
+  if (!res.success) { showToast(res.msg, "error"); return; }
+  allCusts = res.customers;
+  renderCustomers();
+}
+function renderCustomers() {
+  const search = (document.querySelector("#page-customers .filter-input")?.value || "").toLowerCase();
+  let list = allCusts;
+  if (search) list = list.filter(c => (c.Name + c.Email + c.Phone).toLowerCase().includes(search));
+  const tbody = document.querySelector("#customersTable tbody");
+  tbody.innerHTML = list.map(c => `
+    <tr>
+      <td><strong>${esc(c.Name)}</strong></td>
+      <td>${esc(c.Email)}</td>
+      <td>${esc(c.Phone)}</td>
+      <td><strong>${c.TotalOrders || 0}</strong></td>
+      <td>₹${Number(c.TotalSpend || 0).toLocaleString()}</td>
+      <td>${fmtDate(c.LastOrderDate)}</td>
+    </tr>`).join("") || `<tr class="empty-row"><td colspan="6">No customers yet</td></tr>`;
+}
+
+// ── REPORTS ──
+async function loadReports() {
+  const res = await api({ action: "getReports", role: session.role });
+  if (!res.success) return;
+  const r = res.report;
+  document.getElementById("reportStats").innerHTML = `
+    <div class="stat-card green"><div class="stat-label">Total Revenue</div><div class="stat-value">₹${(r.totalRevenue || 0).toLocaleString()}</div><div class="stat-sub">All time (paid orders)</div></div>
+    <div class="stat-card blue"><div class="stat-label">This Month</div><div class="stat-value">₹${(r.monthRevenue || 0).toLocaleString()}</div><div class="stat-sub">${r.monthOrders} orders</div></div>
+    <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value">${r.totalOrders}</div></div>
+    <div class="stat-card gold"><div class="stat-label">Pending Payments</div><div class="stat-value">${r.pendingPayments}</div></div>`;
+  const byS = r.ordersByStatus || {};
+  document.getElementById("reportBreakdown").innerHTML = `
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:var(--light-gray);">
+        <th style="padding:10px;text-align:left;font-size:.78rem;font-weight:600;">Status</th>
+        <th style="padding:10px;text-align:right;font-size:.78rem;font-weight:600;">Count</th>
+        <th style="padding:10px;font-size:.78rem;font-weight:600;">Distribution</th>
+      </tr></thead>
+      <tbody>
+        ${Object.entries(byS).map(([s, c]) => `
+        <tr>
+          <td style="padding:10px;">${statusBadge(s)}</td>
+          <td style="padding:10px;text-align:right;font-weight:700;">${c}</td>
+          <td style="padding:10px;">
+            <div style="background:var(--light-gray);border-radius:4px;height:8px;overflow:hidden;">
+              <div style="background:var(--crimson);height:100%;width:${Math.round(c / Math.max(1, r.totalOrders) * 100)}%;border-radius:4px;"></div>
+            </div>
+          </td>
+        </tr>`).join("")}
+      </tbody>
+    </table>`;
+}
+
+// ── HELPERS ──
+function statusBadge(s) {
+  const map = { "New": "b-new", "Confirmed": "b-confirmed", "In Progress": "b-progress", "Ready": "b-ready", "Delivered": "b-delivered", "Cancelled": "b-cancelled" };
+  return `<span class="badge ${map[s] || ""}">${esc(s || "—")}</span>`;
+}
+function payBadge(s) {
+  const cls = s === "Paid" ? "b-paid" : s?.includes("Pending") ? "b-pending" : "b-rejected";
+  return `<span class="badge ${cls}">${esc(s || "—")}</span>`;
+}
+function fmtDate(d) {
+  if (!d) return "—";
+  try { return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }); }
+  catch (e) { return String(d).substring(0, 10); }
+}
+function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+function handleModalClick(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+function esc(str) {
+  return String(str || "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[m]);
+}
+function sanitize(str) { return String(str || "").replace(/<[^>]*>/g, "").replace(/['"`;]/g, "").trim().substring(0, 200); }
+function sanitizeURL(url) { if (!url || !/^https?:\/\//i.test(url)) return ""; return url.replace(/[<>"']/g, ""); }
+function showToast(msg, type = "") {
+  const c = document.getElementById("toastWrap");
+  const t = document.createElement("div");
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  requestAnimationFrame(() => { setTimeout(() => t.classList.add("show"), 10); });
+  setTimeout(() => { t.classList.remove("show"); setTimeout(() => t.remove(), 400); }, 3500);
+}
+</script>
+</body>
+</html>
